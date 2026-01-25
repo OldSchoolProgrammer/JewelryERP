@@ -260,3 +260,33 @@ def payment_cancel(request):
     if invoice_id:
         invoice = Invoice.objects.filter(pk=invoice_id).first()
     return render(request, 'sales/payment_cancel.html', {'invoice': invoice})
+
+
+@login_required
+def invoice_search(request):
+    """Search invoices for autocomplete in certificate form."""
+    from django.db.models import Q
+    query = request.GET.get('q', '').strip()
+    invoices = Invoice.objects.select_related('customer').filter(status='paid')
+    
+    if query:
+        invoices = invoices.filter(
+            Q(invoice_number__icontains=query) | Q(customer__name__icontains=query)
+        )
+    
+    # Limit results for performance
+    invoices = invoices[:20]
+    
+    results = [
+        {
+            'id': inv.pk,
+            'invoice_number': inv.invoice_number,
+            'customer': inv.customer.name if inv.customer else 'Walk-in',
+            'total': str(inv.total),
+            'status': inv.get_status_display(),
+            'text': f"{inv.invoice_number} - {inv.customer.name if inv.customer else 'Walk-in'} (€{inv.total})",
+        }
+        for inv in invoices
+    ]
+    
+    return JsonResponse({'results': results})

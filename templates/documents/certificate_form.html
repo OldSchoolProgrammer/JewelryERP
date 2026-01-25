@@ -2,6 +2,15 @@
 
 {% block title %}{{ title }} - Jewelry Store ERP{% endblock %}
 
+{% block extra_css %}
+<!-- Tom Select for searchable dropdowns -->
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+<style>
+    .ts-wrapper { width: 100%; }
+    .ts-control { min-height: 38px; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-file-earmark-pdf me-2"></i>{{ title }}</h2>
@@ -34,4 +43,88 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Tom Select for searchable dropdowns -->
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+<script>
+(function() {
+    // Initialize Tom Select for Jewelry Item dropdown
+    const itemSelect = document.getElementById('id_item');
+    if (itemSelect) {
+        new TomSelect(itemSelect, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: ['sku', 'name', 'text'],
+            placeholder: 'Search by SKU or name...',
+            openOnFocus: true,
+            preload: 'focus',
+            load: function(query, callback) {
+                fetch('/inventory/search/?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => callback(data.results))
+                    .catch(() => callback());
+            },
+            render: {
+                option: function(data, escape) {
+                    if (data.sku) {
+                        return '<div class="d-flex justify-content-between">' +
+                            '<span><strong>' + escape(data.sku) + '</strong> - ' + escape(data.name) + '</span>' +
+                            '<span class="text-muted">€' + escape(data.sale_price) + '</span>' +
+                        '</div>';
+                    } else {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    }
+                },
+                item: function(data, escape) {
+                    if (data.sku) {
+                        return '<div>' + escape(data.sku) + ' - ' + escape(data.name) + '</div>';
+                    } else {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    }
+                }
+            }
+        });
+    }
+    
+    // Initialize Tom Select for Invoice dropdown
+    const invoiceSelect = document.getElementById('id_invoice');
+    if (invoiceSelect) {
+        new TomSelect(invoiceSelect, {
+            valueField: 'id',
+            labelField: 'text',
+            searchField: ['invoice_number', 'customer', 'text'],
+            placeholder: 'Search by invoice # or customer...',
+            openOnFocus: true,
+            preload: 'focus',
+            load: function(query, callback) {
+                fetch('/sales/search/?q=' + encodeURIComponent(query))
+                    .then(response => response.json())
+                    .then(data => callback(data.results))
+                    .catch(() => callback());
+            },
+            render: {
+                option: function(data, escape) {
+                    if (data.invoice_number) {
+                        return '<div class="d-flex justify-content-between">' +
+                            '<span><strong>' + escape(data.invoice_number) + '</strong> - ' + escape(data.customer) + '</span>' +
+                            '<span class="text-muted">€' + escape(data.total) + ' (' + escape(data.status) + ')</span>' +
+                        '</div>';
+                    } else {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    }
+                },
+                item: function(data, escape) {
+                    if (data.invoice_number) {
+                        return '<div>' + escape(data.invoice_number) + ' - ' + escape(data.customer) + '</div>';
+                    } else {
+                        return '<div>' + escape(data.text || '') + '</div>';
+                    }
+                }
+            }
+        });
+    }
+})();
+</script>
 {% endblock %}

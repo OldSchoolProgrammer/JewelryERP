@@ -155,3 +155,31 @@ def item_json(request, pk):
         'sale_price': str(item.sale_price),
         'quantity_on_hand': item.quantity_on_hand,
     })
+
+
+@login_required
+def item_search(request):
+    """Search items for autocomplete in invoice form."""
+    query = request.GET.get('q', '').strip()
+    items = JewelryItem.objects.filter(is_active=True)
+    
+    if query:
+        items = items.filter(
+            Q(sku__icontains=query) | Q(name__icontains=query)
+        )
+    
+    # Limit results for performance
+    items = items[:20]
+    
+    results = [
+        {
+            'id': item.pk,
+            'sku': item.sku,
+            'name': item.name,
+            'text': f"{item.sku} - {item.name}",
+            'sale_price': str(item.sale_price),
+        }
+        for item in items
+    ]
+    
+    return JsonResponse({'results': results})
