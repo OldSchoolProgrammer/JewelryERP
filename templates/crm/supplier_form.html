@@ -24,8 +24,20 @@
                         {% if form.email.errors %}<div class="text-danger small">{{ form.email.errors.0 }}</div>{% endif %}
                     </div>
                     <div class="mb-3">
-                        <label for="id_phone" class="form-label">Phone</label>
+                        <label class="form-label">Phone</label>
+                        <div class="row g-2">
+                            <div class="col-5">
+                                {{ form.phone_prefix }}
+                            </div>
+                            <div class="col-7">
+                                {{ form.phone_number }}
+                            </div>
+                        </div>
                         {{ form.phone }}
+                    </div>
+                    <div class="mb-3">
+                        <label for="id_vat_number" class="form-label">VAT Registration Number</label>
+                        {{ form.vat_number }}
                     </div>
                     <div class="mb-3">
                         <label for="id_address" class="form-label">Address</label>

@@ -22,6 +22,7 @@
             <div class="card-body">
                 <p><strong>Email:</strong> {{ supplier.email|default:"-" }}</p>
                 <p><strong>Phone:</strong> {{ supplier.phone|default:"-" }}</p>
+                <p><strong>VAT Number:</strong> {{ supplier.vat_number|default:"-" }}</p>
                 <p><strong>Address:</strong><br>{{ supplier.address|default:"-"|linebreaks }}</p>
             </div>
         </div>
