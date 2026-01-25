@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.sku }} - Jewelry Store ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box-seam me-2"></i>{{ item.sku }}</h2>
+    <div>
+        <a href="{% url 'inventory:item_edit' item.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a href="{% url 'inventory:item_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">{{ item.name }}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Category:</strong><br>{{ item.category.name|default:"-" }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Metal:</strong><br>{{ item.get_metal_display }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Purity:</strong><br>{{ item.purity|default:"-" }}
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <strong>Weight:</strong><br>{{ item.weight_grams|default:"-" }} grams
+                    </div>
+                    <div class="col-md-8">
+                        <strong>Stone Details:</strong><br>{{ item.stone_details|default:"-" }}
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <strong>Description:</strong><br>{{ item.description|default:"-" }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Pricing & Stock</div>
+            <div class="card-body">
+                <p><strong>Cost Price:</strong> €{{ item.cost_price }}</p>
+                <p><strong>Sale Price:</strong> €{{ item.sale_price }}</p>
+                <p><strong>Profit Margin:</strong> {{ item.profit_margin|floatformat:1 }}%</p>
+                <p><strong>Quantity on Hand:</strong> 
+                    <span class="badge {% if item.quantity_on_hand <= 5 %}bg-danger{% elif item.quantity_on_hand <= 10 %}bg-warning text-dark{% else %}bg-success{% endif %}">
+                        {{ item.quantity_on_hand }}
+                    </span>
+                </p>
+                <p><strong>Status:</strong> 
+                    {% if item.is_active %}
+                    <span class="badge bg-success">Active</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

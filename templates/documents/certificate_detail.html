@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ certificate.certificate_number }} - Jewelry Store ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-file-earmark-pdf me-2"></i>{{ certificate.certificate_number }}</h2>
+    <div>
+        {% if certificate.pdf_file %}
+        <a href="{% url 'documents:certificate_download' certificate.pk %}" class="btn btn-primary">
+            <i class="bi bi-download me-1"></i>Download PDF
+        </a>
+        {% if certificate.invoice and certificate.invoice.customer %}
+        <a href="{% url 'documents:certificate_email' certificate.pk %}" class="btn btn-success">
+            <i class="bi bi-envelope me-1"></i>Email to Customer
+        </a>
+        {% endif %}
+        {% endif %}
+        <a href="{% url 'documents:certificate_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">Certificate Details</div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Certificate Number:</strong><br>{{ certificate.certificate_number }}
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Issue Date:</strong><br>{{ certificate.issued_at|date:"M d, Y H:i" }}
+                    </div>
+                </div>
+                
+                <hr>
+                
+                <h5>Item Information</h5>
+                <div class="row">
+                    <div class="col-md-4">
+                        <strong>SKU:</strong><br>{{ certificate.item.sku }}
+                    </div>
+                    <div class="col-md-8">
+                        <strong>Name:</strong><br>{{ certificate.item.name }}
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <strong>Metal:</strong><br>{{ certificate.item.get_metal_display }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Purity:</strong><br>{{ certificate.item.purity|default:"-" }}
+                    </div>
+                    <div class="col-md-4">
+                        <strong>Weight:</strong><br>{{ certificate.item.weight_grams|default:"-" }} grams
+                    </div>
+                </div>
+                {% if certificate.item.stone_details %}
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <strong>Stone Details:</strong><br>{{ certificate.item.stone_details }}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Related Invoice</div>
+            <div class="card-body">
+                {% if certificate.invoice %}
+                <p><strong>Invoice:</strong> <a href="{% url 'sales:invoice_detail' certificate.invoice.pk %}">{{ certificate.invoice.invoice_number }}</a></p>
+                {% if certificate.invoice.customer %}
+                <p><strong>Customer:</strong> {{ certificate.invoice.customer.name }}</p>
+                <p><strong>Email:</strong> {{ certificate.invoice.customer.email|default:"-" }}</p>
+                {% endif %}
+                {% else %}
+                <p class="text-muted">No invoice linked.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">PDF Status</div>
+            <div class="card-body">
+                {% if certificate.pdf_file %}
+                <p><span class="badge bg-success"><i class="bi bi-check"></i> Generated</span></p>
+                <p><small class="text-muted">{{ certificate.pdf_file.name }}</small></p>
+                {% else %}
+                <p><span class="badge bg-warning">PDF not generated</span></p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

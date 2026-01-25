@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ invoice.invoice_number }} - Jewelry Store ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-receipt me-2"></i>{{ invoice.invoice_number }}</h2>
+    <div>
+        {% if invoice.status == 'draft' %}
+        <a href="{% url 'sales:invoice_edit' invoice.pk %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i>Edit
+        </a>
+        <a href="{% url 'sales:invoice_send' invoice.pk %}" class="btn btn-success">
+            <i class="bi bi-envelope me-1"></i>Send Invoice
+        </a>
+        <a href="{% url 'sales:invoice_void' invoice.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-x-circle me-1"></i>Void
+        </a>
+        {% elif invoice.status == 'sent' %}
+        <button class="btn btn-success" onclick="generatePaymentLink()">
+            <i class="bi bi-link-45deg me-1"></i>Get Payment Link
+        </button>
+        <a href="{% url 'sales:invoice_void' invoice.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-x-circle me-1"></i>Void
+        </a>
+        {% endif %}
+        <a href="{% url 'sales:invoice_list' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left me-1"></i>Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <span>Invoice Details</span>
+                <span class="badge bg-{% if invoice.status == 'paid' %}success{% elif invoice.status == 'sent' %}primary{% elif invoice.status == 'void' %}danger{% else %}secondary{% endif %} fs-6">
+                    {{ invoice.get_status_display }}
+                </span>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Customer:</strong><br>
+                        {% if invoice.customer %}
+                        {{ invoice.customer.name }}<br>
+                        <small class="text-muted">{{ invoice.customer.email }}</small>
+                        {% else %}
+                        Walk-in Customer
+                        {% endif %}
+                    </div>
+                    <div class="col-md-6 text-md-end">
+                        <strong>Date:</strong> {{ invoice.created_at|date:"M d, Y" }}<br>
+                        <strong>Invoice #:</strong> {{ invoice.invoice_number }}
+                    </div>
+                </div>
+                
+                <table class="table table-bordered">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th class="text-center">Qty</th>
+                            <th class="text-end">Unit Price</th>
+                            <th class="text-end">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for line in invoice.lines.all %}
+                        <tr>
+                            <td>{{ line.item.sku|default:"-" }}</td>
+                            <td>{{ line.description }}</td>
+                            <td class="text-center">{{ line.quantity }}</td>
+                            <td class="text-end">€{{ line.unit_price }}</td>
+                            <td class="text-end">€{{ line.line_total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No items</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="4" class="text-end"><strong>Subtotal:</strong></td>
+                            <td class="text-end">€{{ invoice.subtotal }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end">Tax:</td>
+                            <td class="text-end">€{{ invoice.tax }}</td>
+                        </tr>
+                        <tr>
+                            <td colspan="4" class="text-end">Discount:</td>
+                            <td class="text-end">-€{{ invoice.discount }}</td>
+                        </tr>
+                        <tr class="table-dark">
+                            <td colspan="4" class="text-end"><strong>Total:</strong></td>
+                            <td class="text-end"><strong>€{{ invoice.total }}</strong></td>
+                        </tr>
+                    </tfoot>
+                </table>
+                
+                {% if invoice.notes %}
+                <div class="mt-3">
+                    <strong>Notes:</strong><br>
+                    {{ invoice.notes|linebreaks }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">Payment Information</div>
+            <div class="card-body">
+                {% if invoice.stripe_checkout_session_id %}
+                <p><strong>Checkout Session:</strong><br>
+                <small class="text-muted">{{ invoice.stripe_checkout_session_id }}</small></p>
+                {% endif %}
+                {% if invoice.stripe_payment_intent_id %}
+                <p><strong>Payment Intent:</strong><br>
+                <small class="text-muted">{{ invoice.stripe_payment_intent_id }}</small></p>
+                {% endif %}
+                {% if not invoice.stripe_checkout_session_id and not invoice.stripe_payment_intent_id %}
+                <p class="text-muted">No payment information yet.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="paymentLinkModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Link</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="input-group">
+                    <input type="text" id="paymentLinkInput" class="form-control" readonly>
+                    <button class="btn btn-outline-secondary" onclick="copyPaymentLink()">
+                        <i class="bi bi-clipboard"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function generatePaymentLink() {
+    fetch('{% url "sales:generate_payment_link" invoice.pk %}')
+        .then(response => response.json())
+        .then(data => {
+            if (data.url) {
+                document.getElementById('paymentLinkInput').value = data.url;
+                new bootstrap.Modal(document.getElementById('paymentLinkModal')).show();
+            } else {
+                alert('Error: ' + data.error);
+            }
+        });
+}
+
+function copyPaymentLink() {
+    const input = document.getElementById('paymentLinkInput');
+    input.select();
+    document.execCommand('copy');
+    alert('Link copied!');
+}
+</script>
+{% endblock %}

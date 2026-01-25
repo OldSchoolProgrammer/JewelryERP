@@ -1,0 +1,100 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }} - Jewelry Store ERP{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-box-seam me-2"></i>{{ title }}</h2>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="id_sku" class="form-label">SKU *</label>
+                            {{ form.sku }}
+                            {% if form.sku.errors %}<div class="text-danger small">{{ form.sku.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-8">
+                            <label for="id_name" class="form-label">Name *</label>
+                            {{ form.name }}
+                            {% if form.name.errors %}<div class="text-danger small">{{ form.name.errors.0 }}</div>{% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="id_category" class="form-label">Category</label>
+                            {{ form.category }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_metal" class="form-label">Metal</label>
+                            {{ form.metal }}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_purity" class="form-label">Purity</label>
+                            {{ form.purity }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="id_weight_grams" class="form-label">Weight (grams)</label>
+                            {{ form.weight_grams }}
+                        </div>
+                        <div class="col-md-8">
+                            <label for="id_stone_details" class="form-label">Stone Details</label>
+                            {{ form.stone_details }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_description" class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+                    
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="id_cost_price" class="form-label">Cost Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                {{ form.cost_price }}
+                            </div>
+                            {% if form.cost_price.errors %}<div class="text-danger small">{{ form.cost_price.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_sale_price" class="form-label">Sale Price *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">€</span>
+                                {{ form.sale_price }}
+                            </div>
+                            {% if form.sale_price.errors %}<div class="text-danger small">{{ form.sale_price.errors.0 }}</div>{% endif %}
+                        </div>
+                        <div class="col-md-4">
+                            <label for="id_quantity_on_hand" class="form-label">Quantity on Hand</label>
+                            {{ form.quantity_on_hand }}
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label" for="id_is_active">Active</label>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-check-lg me-1"></i>Save
+                        </button>
+                        <a href="{% url 'inventory:item_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
