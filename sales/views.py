@@ -6,12 +6,15 @@ from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.http import HttpResponse, JsonResponse
+from django.core.paginator import Paginator
 
 from .models import Invoice, InvoiceLine
 from .forms import InvoiceForm, InvoiceLineFormSet
 from notifications.email_service import send_invoice_email, send_payment_confirmation_email
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
+
+ITEMS_PER_PAGE = 10
 
 
 @login_required
@@ -20,7 +23,12 @@ def invoice_list(request):
     status_filter = request.GET.get('status')
     if status_filter:
         invoices = invoices.filter(status=status_filter)
-    return render(request, 'sales/invoice_list.html', {'invoices': invoices, 'status_filter': status_filter})
+    
+    paginator = Paginator(invoices, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'sales/invoice_list.html', {'invoices': page_obj, 'page_obj': page_obj, 'status_filter': status_filter})
 
 
 @login_required

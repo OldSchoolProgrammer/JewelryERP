@@ -2,9 +2,12 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 from .models import Customer, Supplier
 from .forms import CustomerForm, SupplierForm
+
+ITEMS_PER_PAGE = 10
 
 
 # Customer Views
@@ -14,7 +17,12 @@ def customer_list(request):
     search = request.GET.get('search', '')
     if search:
         customers = customers.filter(Q(name__icontains=search) | Q(email__icontains=search) | Q(phone__icontains=search))
-    return render(request, 'crm/customer_list.html', {'customers': customers, 'search': search})
+    
+    paginator = Paginator(customers, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'crm/customer_list.html', {'customers': page_obj, 'page_obj': page_obj, 'search': search})
 
 
 @login_required
@@ -68,7 +76,12 @@ def supplier_list(request):
     search = request.GET.get('search', '')
     if search:
         suppliers = suppliers.filter(Q(name__icontains=search) | Q(email__icontains=search) | Q(phone__icontains=search))
-    return render(request, 'crm/supplier_list.html', {'suppliers': suppliers, 'search': search})
+    
+    paginator = Paginator(suppliers, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'crm/supplier_list.html', {'suppliers': page_obj, 'page_obj': page_obj, 'search': search})
 
 
 @login_required

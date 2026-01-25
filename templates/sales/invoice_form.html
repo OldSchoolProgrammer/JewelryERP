@@ -5,31 +5,35 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-receipt me-2"></i>{{ title }}</h2>
+    <a href="{% url 'sales:invoice_list' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left me-1"></i>Back to Invoices
+    </a>
 </div>
 
 <form method="post">
     {% csrf_token %}
     
     <div class="row">
+        <!-- Left Column: Invoice Items -->
         <div class="col-lg-8">
             <div class="card mb-4">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <span>Invoice Items</span>
+                    <span><i class="bi bi-list-ul me-2"></i>Invoice Items</span>
                     <button type="button" class="btn btn-sm btn-success" id="add-item-btn">
                         <i class="bi bi-plus-lg me-1"></i>Add Item
                     </button>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     {{ formset.management_form }}
-                    <table class="table" id="invoice-lines">
-                        <thead>
+                    <table class="table table-hover mb-0" id="invoice-lines">
+                        <thead class="table-light">
                             <tr>
-                                <th style="width: 200px;">Item</th>
+                                <th style="width: 180px;">Item</th>
                                 <th>Description</th>
-                                <th style="width: 80px;">Qty</th>
-                                <th style="width: 120px;">Unit Price</th>
-                                <th style="width: 100px;">Line Total</th>
-                                <th style="width: 50px;"></th>
+                                <th style="width: 70px;" class="text-center">Qty</th>
+                                <th style="width: 110px;" class="text-end">Unit Price</th>
+                                <th style="width: 100px;" class="text-end">Line Total</th>
+                                <th style="width: 40px;"></th>
                             </tr>
                         </thead>
                         <tbody id="formset-body">
@@ -43,8 +47,8 @@
                                 <td>{{ line_form.quantity }}</td>
                                 <td>{{ line_form.unit_price }}</td>
                                 <td class="line-total text-end">€0.00</td>
-                                <td>
-                                    <div class="form-check">
+                                <td class="text-center">
+                                    <div class="form-check d-inline-block">
                                         {{ line_form.DELETE }}
                                         <label class="form-check-label text-danger" title="Remove"><i class="bi bi-trash"></i></label>
                                     </div>
@@ -64,48 +68,47 @@
             </div>
         </div>
         
+        <!-- Right Column: Customer, Details & Totals -->
         <div class="col-lg-4">
             <div class="card mb-4">
-                <div class="card-header">Customer & Details</div>
+                <div class="card-header"><i class="bi bi-person me-2"></i>Customer & Details</div>
                 <div class="card-body">
                     <div class="mb-3">
                         <label for="id_customer" class="form-label">Customer</label>
                         {{ form.customer }}
-                        <small class="text-muted">Leave blank for walk-in customer</small>
+                        <small class="text-muted">Leave blank for walk-in</small>
                     </div>
-                    <div class="mb-3">
-                        <label for="id_tax" class="form-label">Tax (€)</label>
-                        {{ form.tax }}
-                    </div>
-                    <div class="mb-3">
-                        <label for="id_discount" class="form-label">Discount (€)</label>
-                        {{ form.discount }}
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="id_tax" class="form-label">Tax (€)</label>
+                            {{ form.tax }}
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="id_discount" class="form-label">Discount (€)</label>
+                            {{ form.discount }}
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="id_notes" class="form-label">Notes</label>
                         {{ form.notes }}
                     </div>
                 </div>
-            </div>
-            
-            <!-- Invoice Total Summary -->
-            <div class="card mb-4">
-                <div class="card-header bg-dark text-white">Invoice Total</div>
-                <div class="card-body">
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Items Subtotal:</span>
+                <!-- Invoice Summary -->
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between py-1">
+                        <span>Subtotal:</span>
                         <span id="summary-subtotal">€0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between py-1 text-muted">
                         <span>Tax:</span>
                         <span id="summary-tax">€0.00</span>
                     </div>
-                    <div class="d-flex justify-content-between mb-2">
+                    <div class="d-flex justify-content-between py-1 text-muted">
                         <span>Discount:</span>
                         <span id="summary-discount">-€0.00</span>
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between">
+                    <hr class="my-2">
+                    <div class="d-flex justify-content-between py-1">
                         <strong class="fs-5">Total:</strong>
                         <strong class="fs-5 text-success" id="summary-total">€0.00</strong>
                     </div>

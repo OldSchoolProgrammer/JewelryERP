@@ -17,11 +17,11 @@
 
 <div class="card mb-4">
     <div class="card-body">
-        <form method="get" class="row g-3">
-            <div class="col-md-4">
+        <form method="get" class="row g-2">
+            <div class="col">
                 <input type="text" name="search" class="form-control" placeholder="Search SKU or name..." value="{{ search }}">
             </div>
-            <div class="col-md-3">
+            <div class="col-auto" style="min-width: 150px;">
                 <select name="category" class="form-select">
                     <option value="">All Categories</option>
                     {% for cat in categories %}
@@ -29,7 +29,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-auto" style="min-width: 130px;">
                 <select name="metal" class="form-select">
                     <option value="">All Metals</option>
                     <option value="gold" {% if selected_metal == 'gold' %}selected{% endif %}>Gold</option>
@@ -38,9 +38,17 @@
                     <option value="other" {% if selected_metal == 'other' %}selected{% endif %}>Other</option>
                 </select>
             </div>
-            <div class="col-md-2">
-                <button type="submit" class="btn btn-secondary w-100">
-                    <i class="bi bi-search me-1"></i>Filter
+            <div class="col-auto" style="min-width: 130px;">
+                <select name="purity" class="form-select">
+                    <option value="">All Purities</option>
+                    {% for value, label in purity_choices %}
+                    <option value="{{ value }}" {% if selected_purity == value %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="bi bi-filter me-1"></i>Filter
                 </button>
             </div>
         </form>
@@ -57,6 +65,7 @@
                     <th>Category</th>
                     <th>Metal</th>
                     <th>Purity</th>
+                    <th class="text-end">Weight (g)</th>
                     <th class="text-end">Price</th>
                     <th>Status</th>
                     <th class="text-end">Actions</th>
@@ -70,6 +79,7 @@
                     <td>{{ item.category.name|default:"-" }}</td>
                     <td>{{ item.get_metal_display }}</td>
                     <td>{{ item.purity|default:"-" }}</td>
+                    <td class="text-end">{{ item.weight_grams|default:"-" }}</td>
                     <td class="text-end">€{{ item.sale_price }}</td>
                     <td>
                         {% if item.is_active %}
@@ -89,11 +99,13 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="8" class="text-center text-muted py-4">No items found.</td>
+                    <td colspan="9" class="text-center text-muted py-4">No items found.</td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
+
+{% include 'includes/pagination.html' %}
 {% endblock %}

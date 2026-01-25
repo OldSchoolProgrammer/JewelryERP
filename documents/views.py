@@ -2,17 +2,25 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import FileResponse, Http404
+from django.core.paginator import Paginator
 
 from .models import Certificate
 from .forms import CertificateForm
 from .pdf_generator import generate_certificate_pdf
 from notifications.email_service import send_certificate_email
 
+ITEMS_PER_PAGE = 10
+
 
 @login_required
 def certificate_list(request):
     certificates = Certificate.objects.select_related('item', 'invoice').all()
-    return render(request, 'documents/certificate_list.html', {'certificates': certificates})
+    
+    paginator = Paginator(certificates, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'documents/certificate_list.html', {'certificates': page_obj, 'page_obj': page_obj})
 
 
 @login_required

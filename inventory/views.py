@@ -3,9 +3,12 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from django.http import JsonResponse
+from django.core.paginator import Paginator
 
 from .models import JewelryItem, Category
 from .forms import JewelryItemForm, CategoryForm
+
+ITEMS_PER_PAGE = 10
 
 
 @login_required
@@ -24,14 +27,26 @@ def item_list(request):
     if metal:
         items = items.filter(metal=metal)
     
+    purity = request.GET.get('purity')
+    if purity:
+        items = items.filter(purity=purity)
+    
     categories = Category.objects.all()
+    purity_choices = JewelryItem.PURITY_CHOICES
+    
+    paginator = Paginator(items, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
     
     return render(request, 'inventory/item_list.html', {
-        'items': items,
+        'items': page_obj,
+        'page_obj': page_obj,
         'categories': categories,
+        'purity_choices': purity_choices,
         'search': search,
         'selected_category': category_id,
         'selected_metal': metal,
+        'selected_purity': purity,
     })
 
 
@@ -82,7 +97,12 @@ def item_delete(request, pk):
 @login_required
 def category_list(request):
     categories = Category.objects.all()
-    return render(request, 'inventory/category_list.html', {'categories': categories})
+    
+    paginator = Paginator(categories, ITEMS_PER_PAGE)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    return render(request, 'inventory/category_list.html', {'categories': page_obj, 'page_obj': page_obj})
 
 
 @login_required
