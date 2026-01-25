@@ -13,7 +13,12 @@
     <div class="row">
         <div class="col-lg-8">
             <div class="card mb-4">
-                <div class="card-header">Invoice Items</div>
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <span>Invoice Items</span>
+                    <button type="button" class="btn btn-sm btn-success" id="add-item-btn">
+                        <i class="bi bi-plus-lg me-1"></i>Add Item
+                    </button>
+                </div>
                 <div class="card-body">
                     {{ formset.management_form }}
                     <table class="table" id="invoice-lines">
@@ -23,10 +28,11 @@
                                 <th>Description</th>
                                 <th style="width: 80px;">Qty</th>
                                 <th style="width: 120px;">Unit Price</th>
+                                <th style="width: 100px;">Line Total</th>
                                 <th style="width: 50px;"></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="formset-body">
                             {% for line_form in formset %}
                             <tr class="line-row">
                                 <td>
@@ -36,16 +42,23 @@
                                 <td>{{ line_form.description }}</td>
                                 <td>{{ line_form.quantity }}</td>
                                 <td>{{ line_form.unit_price }}</td>
+                                <td class="line-total text-end">€0.00</td>
                                 <td>
-                                    {% if line_form.instance.pk %}
                                     <div class="form-check">
                                         {{ line_form.DELETE }}
+                                        <label class="form-check-label text-danger" title="Remove"><i class="bi bi-trash"></i></label>
                                     </div>
-                                    {% endif %}
                                 </td>
                             </tr>
                             {% endfor %}
                         </tbody>
+                        <tfoot>
+                            <tr class="table-light">
+                                <td colspan="4" class="text-end"><strong>Items Subtotal:</strong></td>
+                                <td class="text-end"><strong id="items-subtotal">€0.00</strong></td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
@@ -75,6 +88,30 @@
                 </div>
             </div>
             
+            <!-- Invoice Total Summary -->
+            <div class="card mb-4">
+                <div class="card-header bg-dark text-white">Invoice Total</div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Items Subtotal:</span>
+                        <span id="summary-subtotal">€0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Tax:</span>
+                        <span id="summary-tax">€0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Discount:</span>
+                        <span id="summary-discount">-€0.00</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between">
+                        <strong class="fs-5">Total:</strong>
+                        <strong class="fs-5 text-success" id="summary-total">€0.00</strong>
+                    </div>
+                </div>
+            </div>
+            
             <div class="d-grid gap-2">
                 <button type="submit" class="btn btn-primary btn-lg">
                     <i class="bi bi-check-lg me-1"></i>Save Invoice
@@ -88,20 +125,142 @@
 
 {% block extra_js %}
 <script>
-document.querySelectorAll('.item-select').forEach(function(select) {
-    select.addEventListener('change', function() {
-        const row = this.closest('tr');
-        const option = this.options[this.selectedIndex];
-        if (option.value) {
-            // Auto-populate from data attributes if available
-            fetch('/inventory/' + option.value + '/')
-                .then(r => r.text())
-                .then(html => {
-                    // Basic auto-fill - in production you'd use JSON API
-                })
-                .catch(() => {});
+(function() {
+    const formsetBody = document.getElementById('formset-body');
+    const totalFormsInput = document.querySelector('[name="lines-TOTAL_FORMS"]');
+    const addItemBtn = document.getElementById('add-item-btn');
+    
+    // Calculate line totals and update subtotal
+    function calculateTotals() {
+        let subtotal = 0;
+        document.querySelectorAll('.line-row').forEach(function(row) {
+            const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+            if (deleteCheckbox && deleteCheckbox.checked) {
+                row.querySelector('.line-total').textContent = '€0.00';
+                row.style.opacity = '0.5';
+                return;
+            }
+            row.style.opacity = '1';
+            
+            const qtyInput = row.querySelector('input[name$="-quantity"]');
+            const priceInput = row.querySelector('input[name$="-unit_price"]');
+            const lineTotalCell = row.querySelector('.line-total');
+            
+            const qty = parseFloat(qtyInput?.value) || 0;
+            const price = parseFloat(priceInput?.value) || 0;
+            const lineTotal = qty * price;
+            
+            if (lineTotalCell) {
+                lineTotalCell.textContent = '€' + lineTotal.toFixed(2);
+            }
+            subtotal += lineTotal;
+        });
+        
+        // Update subtotals
+        document.getElementById('items-subtotal').textContent = '€' + subtotal.toFixed(2);
+        document.getElementById('summary-subtotal').textContent = '€' + subtotal.toFixed(2);
+        
+        // Calculate grand total
+        const tax = parseFloat(document.getElementById('id_tax')?.value) || 0;
+        const discount = parseFloat(document.getElementById('id_discount')?.value) || 0;
+        const grandTotal = Math.max(0, subtotal + tax - discount);
+        
+        document.getElementById('summary-tax').textContent = '€' + tax.toFixed(2);
+        document.getElementById('summary-discount').textContent = '-€' + discount.toFixed(2);
+        document.getElementById('summary-total').textContent = '€' + grandTotal.toFixed(2);
+    }
+    
+    // Add new row
+    function addNewRow() {
+        const totalForms = parseInt(totalFormsInput.value);
+        const rows = formsetBody.querySelectorAll('.line-row');
+        const lastRow = rows[rows.length - 1];
+        const newRow = lastRow.cloneNode(true);
+        
+        // Update all input names and IDs
+        newRow.querySelectorAll('input, select').forEach(function(input) {
+            const name = input.name;
+            const id = input.id;
+            if (name) {
+                input.name = name.replace(/-\d+-/, '-' + totalForms + '-');
+            }
+            if (id) {
+                input.id = id.replace(/-\d+-/, '-' + totalForms + '-');
+            }
+            // Clear values
+            if (input.type === 'checkbox') {
+                input.checked = false;
+            } else if (input.tagName === 'SELECT') {
+                input.selectedIndex = 0;
+            } else if (input.type !== 'hidden') {
+                input.value = '';
+            }
+            // Clear hidden id field for new forms
+            if (input.name && input.name.endsWith('-id')) {
+                input.value = '';
+            }
+        });
+        
+        // Reset line total
+        newRow.querySelector('.line-total').textContent = '€0.00';
+        newRow.style.opacity = '1';
+        
+        formsetBody.appendChild(newRow);
+        totalFormsInput.value = totalForms + 1;
+        
+        // Attach events to new row
+        attachRowEvents(newRow);
+        calculateTotals();
+    }
+    
+    // Attach events to a row
+    function attachRowEvents(row) {
+        row.querySelectorAll('input[name$="-quantity"], input[name$="-unit_price"]').forEach(function(input) {
+            input.addEventListener('input', calculateTotals);
+        });
+        const deleteCheckbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+        if (deleteCheckbox) {
+            deleteCheckbox.addEventListener('change', calculateTotals);
         }
-    });
-});
+        
+        // Auto-populate from item selection
+        const itemSelect = row.querySelector('select[name$="-item"]');
+        if (itemSelect) {
+            itemSelect.addEventListener('change', function() {
+                const itemId = this.value;
+                if (itemId) {
+                    fetch('/inventory/' + itemId + '/json/')
+                        .then(response => response.json())
+                        .then(data => {
+                            const descInput = row.querySelector('input[name$="-description"]');
+                            const priceInput = row.querySelector('input[name$="-unit_price"]');
+                            const qtyInput = row.querySelector('input[name$="-quantity"]');
+                            
+                            if (descInput && !descInput.value) {
+                                descInput.value = data.description;
+                            }
+                            if (priceInput && !priceInput.value) {
+                                priceInput.value = data.sale_price;
+                            }
+                            if (qtyInput && !qtyInput.value) {
+                                qtyInput.value = 1;
+                            }
+                            calculateTotals();
+                        })
+                        .catch(err => console.log('Error fetching item:', err));
+                }
+            });
+        }
+    }
+    
+    // Initialize
+    document.querySelectorAll('.line-row').forEach(attachRowEvents);
+    addItemBtn.addEventListener('click', addNewRow);
+    document.getElementById('id_tax')?.addEventListener('input', calculateTotals);
+    document.getElementById('id_discount')?.addEventListener('input', calculateTotals);
+    
+    // Initial calculation
+    calculateTotals();
+})();
 </script>
 {% endblock %}

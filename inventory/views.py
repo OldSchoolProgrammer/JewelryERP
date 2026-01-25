@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
+from django.http import JsonResponse
 
 from .models import JewelryItem, Category
 from .forms import JewelryItemForm, CategoryForm
@@ -120,3 +121,17 @@ def category_delete(request, pk):
         messages.success(request, f'Category "{name}" deleted successfully.')
         return redirect('inventory:category_list')
     return render(request, 'inventory/category_confirm_delete.html', {'category': category})
+
+
+@login_required
+def item_json(request, pk):
+    """Return item details as JSON for invoice form auto-population."""
+    item = get_object_or_404(JewelryItem, pk=pk)
+    return JsonResponse({
+        'id': item.pk,
+        'sku': item.sku,
+        'name': item.name,
+        'description': f"{item.name} - {item.sku}",
+        'sale_price': str(item.sale_price),
+        'quantity_on_hand': item.quantity_on_hand,
+    })
