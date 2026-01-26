@@ -2,35 +2,159 @@
 <html>
 <head>
     <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background: #212529; color: white; padding: 20px; text-align: center; }
-        .content { padding: 20px; background: #f8f9fa; }
-        .certificate-details { background: white; padding: 20px; margin: 20px 0; border-radius: 5px; }
-        .footer { text-align: center; padding: 20px; color: #666; font-size: 12px; }
+        body { 
+            font-family: 'Helvetica Neue', Arial, sans-serif; 
+            line-height: 1.8; 
+            color: #2c2c2c; 
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+        .container { 
+            max-width: 600px; 
+            margin: 40px auto; 
+            background: #ffffff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .logo-section { 
+            background: #000000; 
+            padding: 50px 20px; 
+            text-align: center; 
+        }
+        .logo-section img {
+            max-width: 200px;
+            height: auto;
+        }
+        .content { 
+            padding: 50px 40px; 
+        }
+        .certificate-title {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: #999;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        .certificate-number {
+            font-size: 24px;
+            font-weight: 300;
+            color: #000;
+            margin-bottom: 40px;
+            text-align: center;
+            letter-spacing: 1px;
+        }
+        .greeting {
+            font-size: 16px;
+            color: #2c2c2c;
+            margin-bottom: 25px;
+        }
+        .certificate-box {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            padding: 30px;
+            margin: 30px 0;
+        }
+        .certificate-item {
+            padding: 15px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .certificate-item:last-child {
+            border-bottom: none;
+        }
+        .item-label {
+            font-size: 12px;
+            color: #999;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+        .item-value {
+            font-size: 16px;
+            color: #2c2c2c;
+            font-weight: 400;
+        }
+        .note {
+            margin-top: 30px;
+            font-size: 14px;
+            color: #666;
+            line-height: 1.6;
+            padding: 20px;
+            background: #f9f9f9;
+            border-left: 3px solid #000;
+        }
+        .footer { 
+            text-align: center; 
+            padding: 40px 20px; 
+            background: #f9f9f9;
+            border-top: 1px solid #e0e0e0;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 12px;
+            color: #999;
+        }
+        .attachment-note {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 0;
+        }
+        .attachment-icon {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+        .attachment-text {
+            font-size: 13px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <h1>Jewelry Certificate</h1>
+        <div class="logo-section">
+            <img src="/static/michaello_logo.png" alt="Michaello Jewellery">
         </div>
+        
         <div class="content">
-            <p>Dear {{ customer.name }},</p>
-            <p>Please find attached your jewelry certificate for your recent purchase.</p>
+            <p class="certificate-title">Certificate of Authenticity</p>
+            <p class="certificate-number">{{ certificate.certificate_number }}</p>
             
-            <div class="certificate-details">
-                <p><strong>Certificate Number:</strong> {{ certificate.certificate_number }}</p>
-                <p><strong>Item:</strong> {{ certificate.item.name }}</p>
-                <p><strong>SKU:</strong> {{ certificate.item.sku }}</p>
-                <p><strong>Issue Date:</strong> {{ certificate.issued_at|date:"M d, Y" }}</p>
+            <p class="greeting">Dear {{ customer.name }},</p>
+            
+            <p style="font-size: 14px; color: #2c2c2c;">We are delighted to provide you with the certificate of authenticity for your recent jewelry purchase.</p>
+            
+            <div class="certificate-box">
+                <div class="certificate-item">
+                    <div class="item-label">Item Name</div>
+                    <div class="item-value">{{ certificate.item.name }}</div>
+                </div>
+                <div class="certificate-item">
+                    <div class="item-label">SKU</div>
+                    <div class="item-value">{{ certificate.item.sku }}</div>
+                </div>
+                <div class="certificate-item">
+                    <div class="item-label">Issue Date</div>
+                    <div class="item-value">{{ certificate.issued_at|date:"M d, Y" }}</div>
+                </div>
             </div>
             
-            <p>Please keep this certificate for your records. It serves as proof of authenticity and details for your jewelry piece.</p>
+            <div class="attachment-note">
+                <div class="attachment-icon">📎</div>
+                <div class="attachment-text">Certificate Attached to This Email</div>
+            </div>
+            
+            <div class="note">
+                <strong>Important:</strong> Please retain this certificate for your records. It serves as official proof of authenticity and provides detailed specifications of your jewelry piece.
+            </div>
         </div>
+        
         <div class="footer">
-            <p>Thank you for your purchase!</p>
-            <p>Jewelry Store</p>
+            <p style="font-weight: 500; color: #2c2c2c; margin-bottom: 10px;">MICHAELLO JEWELLERY</p>
+            <p>Crafted with excellence</p>
         </div>
     </div>
 </body>
