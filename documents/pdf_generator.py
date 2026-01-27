@@ -91,10 +91,10 @@ def generate_certificate_pdf(certificate):
     footer_style = ParagraphStyle(
         'Footer',
         parent=styles['Normal'],
-        fontSize=9,
+        fontSize=12,
         alignment=TA_CENTER,
         textColor=colors.grey,
-        leading=12,
+        leading=16,
     )
     
     elements = []
@@ -195,7 +195,7 @@ def generate_certificate_pdf(certificate):
         sig_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'signature.png')
         if os.path.exists(sig_path):
             try:
-                canvas.drawImage(sig_path, letter[0]/2 - 65, sig_y_img, width=130, height=45, mask='auto')
+                canvas.drawImage(sig_path, letter[0]/2 - 65, sig_y_img, width=130, height=60, mask='auto')
             except:
                 pass # Fallback if image is corrupted
                 
