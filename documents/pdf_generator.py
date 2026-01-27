@@ -20,26 +20,50 @@ def generate_certificate_pdf(certificate):
         rightMargin=72,
         leftMargin=72,
         topMargin=72,
-        bottomMargin=72
+        bottomMargin=120 # Increased to reserve space for bottom signature
     )
     
     styles = getSampleStyleSheet()
     
-    title_style = ParagraphStyle(
-        'Title',
-        parent=styles['Heading1'],
-        fontSize=24,
+    # Brand Colors
+    BRAND_BG = colors.HexColor('#120b00')
+    BRAND_TEXT = colors.HexColor('#FFE100')
+    
+    michaello_style = ParagraphStyle(
+        'Michaello',
+        parent=styles['Normal'],
+        fontSize=28,
         alignment=TA_CENTER,
-        spaceAfter=30,
+        textColor=BRAND_TEXT,
+        fontName='Helvetica-Bold',
+        leading=30,
     )
     
-    subtitle_style = ParagraphStyle(
-        'Subtitle',
+    jewellery_style = ParagraphStyle(
+        'Jewellery',
         parent=styles['Normal'],
-        fontSize=14,
+        fontSize=16,
+        alignment=TA_CENTER,
+        textColor=BRAND_TEXT,
+        fontName='Courier',
+        leading=18,
+    )
+    
+    cert_title_style = ParagraphStyle(
+        'CertTitle',
+        parent=styles['Normal'],
+        fontSize=12,
         alignment=TA_CENTER,
         textColor=colors.grey,
-        spaceAfter=40,
+        spaceAfter=5,
+    )
+    
+    cert_number_style = ParagraphStyle(
+        'CertNumber',
+        parent=styles['Normal'],
+        fontSize=22,
+        alignment=TA_CENTER,
+        spaceAfter=15,
     )
     
     heading_style = ParagraphStyle(
@@ -61,18 +85,38 @@ def generate_certificate_pdf(certificate):
         parent=styles['Normal'],
         fontSize=12,
         alignment=TA_CENTER,
-        spaceAfter=20,
+        spaceAfter=15,
+    )
+    
+    footer_style = ParagraphStyle(
+        'Footer',
+        parent=styles['Normal'],
+        fontSize=9,
+        alignment=TA_CENTER,
+        textColor=colors.grey,
+        leading=12,
     )
     
     elements = []
     
-    # Title
-    elements.append(Paragraph("CERTIFICATE OF AUTHENTICITY", title_style))
-    elements.append(Paragraph("Jewelry Store", subtitle_style))
-    
-    # Certificate Number
-    elements.append(Paragraph(f"Certificate No: {certificate.certificate_number}", center_style))
+    # Logo Header Section
+    logo_data = [
+        [Paragraph("Michaello", michaello_style)],
+        [Paragraph("JEWELLERY", jewellery_style)]
+    ]
+    logo_table = Table(logo_data, colWidths=[6.5*inch])
+    logo_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), BRAND_BG),
+        ('TOPPADDING', (0, 0), (-1, 0), 15),
+        ('BOTTOMPADDING', (0, 1), (-1, 1), 15),
+        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
+    ]))
+    elements.append(logo_table)
     elements.append(Spacer(1, 20))
+    
+    # Title & Certificate Number
+    elements.append(Paragraph("CERTIFICATE OF AUTHENTICITY", cert_title_style))
+    elements.append(Paragraph(certificate.certificate_number, cert_number_style))
     
     # Item Details
     item = certificate.item
@@ -94,7 +138,7 @@ def generate_certificate_pdf(certificate):
     
     table = Table(data, colWidths=[2*inch, 4*inch])
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#212529')),
+        ('BACKGROUND', (0, 0), (-1, 0), BRAND_BG),
         ('TEXTCOLOR', (0, 0), (-1, 0), colors.white),
         ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
         ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
@@ -103,15 +147,15 @@ def generate_certificate_pdf(certificate):
         ('TOPPADDING', (0, 0), (-1, 0), 12),
         ('FONTNAME', (0, 1), (0, -1), 'Helvetica-Bold'),
         ('FONTSIZE', (0, 1), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 1), (-1, -1), 8),
-        ('TOPPADDING', (0, 1), (-1, -1), 8),
-        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#dee2e6')),
+        ('BOTTOMPADDING', (0, 1), (-1, -1), 10),
+        ('TOPPADDING', (0, 1), (-1, -1), 10),
+        ('GRID', (0, 0), (-1, -1), 1, colors.HexColor('#e0e0e0')),
         ('SPAN', (0, 0), (-1, 0)),
         ('ALIGN', (0, 0), (-1, 0), 'CENTER'),
     ]))
     
     elements.append(table)
-    elements.append(Spacer(1, 30))
+    elements.append(Spacer(1, 15))
     
     # Issue Date
     elements.append(Paragraph(
@@ -119,37 +163,51 @@ def generate_certificate_pdf(certificate):
         center_style
     ))
     
-    elements.append(Spacer(1, 40))
+    elements.append(Spacer(1, 20))
     
     # Footer
     footer_text = """
-    This certificate confirms the authenticity and specifications of the above jewelry item.
-    Please retain this certificate for your records.
+    Michaello Jewellery, certifies that every component of this jewel is genuine and of good quality 
+    per the details provided hereby, according to the standards of the International Gemological Institute.
     """
-    elements.append(Paragraph(footer_text, center_style))
+    elements.append(Paragraph(footer_text, footer_style))
     
-    elements.append(Spacer(1, 30))
-    
-    # Signature line
-    sig_data = [
-        ['_' * 30, '', '_' * 30],
-        ['Authorized Signature', '', 'Date'],
-    ]
-    sig_table = Table(sig_data, colWidths=[2.5*inch, 1*inch, 2.5*inch])
-    sig_table.setStyle(TableStyle([
-        ('ALIGN', (0, 0), (-1, -1), 'CENTER'),
-        ('FONTSIZE', (0, 0), (-1, -1), 9),
-        ('TEXTCOLOR', (0, 1), (-1, 1), colors.grey),
-    ]))
-    elements.append(sig_table)
-    
-    doc.build(elements)
+    # Define a function to draw the signature at the bottom of the page
+    def draw_fixed_elements(canvas, doc):
+        canvas.saveState()
+        
+        # Signature section coordinates (from bottom)
+        sig_y_text = 40
+        sig_y_line = 55
+        sig_y_img = 60
+        
+        # Draw Authorized Signature text
+        canvas.setFont("Helvetica", 10)
+        canvas.setFillColor(colors.grey)
+        canvas.drawCentredString(letter[0]/2, sig_y_text, "Authorized Signature")
+        
+        # Draw line
+        canvas.setStrokeColor(colors.black)
+        canvas.setLineWidth(0.5)
+        canvas.line(letter[0]/2 - 100, sig_y_line, letter[0]/2 + 100, sig_y_line)
+        
+        # Draw signature image if it exists
+        sig_path = os.path.join(settings.BASE_DIR, 'static', 'images', 'signature.png')
+        if os.path.exists(sig_path):
+            try:
+                canvas.drawImage(sig_path, letter[0]/2 - 65, sig_y_img, width=130, height=45, mask='auto')
+            except:
+                pass # Fallback if image is corrupted
+                
+        canvas.restoreState()
+
+    doc.build(elements, onFirstPage=draw_fixed_elements)
     
     # Save to model
     pdf_content = buffer.getvalue()
     buffer.close()
     
-    filename = f'certificate_{certificate.certificate_number}.pdf'
+    filename = f'{certificate.certificate_number}.pdf'
     certificate.pdf_file.save(filename, ContentFile(pdf_content), save=True)
     
     return certificate.pdf_file
