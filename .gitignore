@@ -39,3 +39,4 @@ Thumbs.db
 
 # Static files (collected)
 staticfiles/
+michaellobmapp.sqlite3

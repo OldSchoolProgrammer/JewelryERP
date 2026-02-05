@@ -19,7 +19,7 @@ def send_invoice_email(invoice, checkout_url):
     if not invoice.customer or not invoice.customer.email:
         return False
     
-    subject = f'Invoice {invoice.invoice_number} from Jewelry Store'
+    subject = f'Invoice {invoice.invoice_number} from Michaello Jewelry'
     
     context = {
         'invoice': invoice,
@@ -59,7 +59,7 @@ def send_payment_confirmation_email(invoice):
     if not invoice.customer or not invoice.customer.email:
         return False
     
-    subject = f'Payment Received - Invoice {invoice.invoice_number}'
+    subject = f'Payment Received - Invoice {invoice.invoice_number} from Michaello Jewelry'
     
     context = {
         'invoice': invoice,
@@ -98,7 +98,7 @@ def send_certificate_email(certificate, customer):
     if not customer or not customer.email:
         return False
     
-    subject = f'Jewelry Certificate - {certificate.certificate_number}'
+    subject = f'Jewelry Certificate - {certificate.certificate_number} from Michaello Jewelry'
     
     context = {
         'certificate': certificate,
@@ -109,7 +109,7 @@ def send_certificate_email(certificate, customer):
     plain_message = f"""
 Dear {customer.name},
 
-Please find attached your jewelry certificate {certificate.certificate_number}.
+Please find attached your jewelry certificate {certificate.certificate_number} from Michaello Jewelry.
 
 Thank you for your purchase!
 
