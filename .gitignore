@@ -40,3 +40,4 @@ Thumbs.db
 # Static files (collected)
 staticfiles/
 michaellobmapp.sqlite3
+fix_orphaned_records.py

@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from decimal import Decimal
+from crm.models import Supplier
 
 
 class Category(models.Model):
@@ -34,6 +35,7 @@ class JewelryItem(models.Model):
     sku = models.CharField(max_length=50, unique=True, verbose_name='SKU')
     name = models.CharField(max_length=200)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True, related_name='items')
+    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True, related_name='jewelry_items')
     description = models.TextField(blank=True)
     metal = models.CharField(max_length=20, choices=METAL_CHOICES, default='gold')
     purity = models.CharField(max_length=20, choices=PURITY_CHOICES, default='N/A')

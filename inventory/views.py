@@ -7,13 +7,14 @@ from django.core.paginator import Paginator
 
 from .models import JewelryItem, Category
 from .forms import JewelryItemForm, CategoryForm
+from crm.models import Supplier
 
 ITEMS_PER_PAGE = 10
 
 
 @login_required
 def item_list(request):
-    items = JewelryItem.objects.select_related('category')
+    items = JewelryItem.objects.select_related('category', 'supplier')
     
     search = request.GET.get('search', '')
     if search:
@@ -22,6 +23,10 @@ def item_list(request):
     category_id = request.GET.get('category')
     if category_id:
         items = items.filter(category_id=category_id)
+    
+    supplier_id = request.GET.get('supplier')
+    if supplier_id:
+        items = items.filter(supplier_id=supplier_id)
     
     metal = request.GET.get('metal')
     if metal:
@@ -32,6 +37,7 @@ def item_list(request):
         items = items.filter(purity=purity)
     
     categories = Category.objects.all()
+    suppliers = Supplier.objects.all()
     purity_choices = JewelryItem.PURITY_CHOICES
     
     paginator = Paginator(items, ITEMS_PER_PAGE)
@@ -42,9 +48,11 @@ def item_list(request):
         'items': page_obj,
         'page_obj': page_obj,
         'categories': categories,
+        'suppliers': suppliers,
         'purity_choices': purity_choices,
         'search': search,
         'selected_category': category_id,
+        'selected_supplier': supplier_id,
         'selected_metal': metal,
         'selected_purity': purity,
     })
@@ -52,7 +60,7 @@ def item_list(request):
 
 @login_required
 def item_detail(request, pk):
-    item = get_object_or_404(JewelryItem, pk=pk)
+    item = get_object_or_404(JewelryItem.objects.select_related('category', 'supplier'), pk=pk)
     return render(request, 'inventory/item_detail.html', {'item': item})
 
 

@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Inventory - Jewelry Store ERP{% endblock %}
+{% block title %}Inventory - Business Manager{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -26,6 +26,14 @@
                     <option value="">All Categories</option>
                     {% for cat in categories %}
                     <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-auto" style="min-width: 150px;">
+                <select name="supplier" class="form-select">
+                    <option value="">All Suppliers</option>
+                    {% for sup in suppliers %}
+                    <option value="{{ sup.id }}" {% if selected_supplier == sup.id|stringformat:"s" %}selected{% endif %}>{{ sup.name }}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -63,6 +71,7 @@
                     <th>SKU</th>
                     <th>Name</th>
                     <th>Category</th>
+                    <th>Supplier</th>
                     <th>Metal</th>
                     <th>Purity</th>
                     <th class="text-end">Weight (g)</th>
@@ -77,6 +86,7 @@
                     <td><a href="{% url 'inventory:item_detail' item.pk %}">{{ item.sku }}</a></td>
                     <td>{{ item.name }}</td>
                     <td>{{ item.category.name|default:"-" }}</td>
+                    <td>{{ item.supplier.name|default:"-" }}</td>
                     <td>{{ item.get_metal_display }}</td>
                     <td>{{ item.purity|default:"-" }}</td>
                     <td class="text-end">{{ item.weight_grams|default:"-" }}</td>

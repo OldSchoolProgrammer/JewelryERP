@@ -10,7 +10,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(JewelryItem)
 class JewelryItemAdmin(admin.ModelAdmin):
-    list_display = ['sku', 'name', 'category', 'metal', 'sale_price', 'quantity_on_hand', 'is_active']
-    list_filter = ['category', 'metal', 'is_active']
+    list_display = ['sku', 'name', 'category', 'supplier', 'metal', 'sale_price', 'quantity_on_hand', 'is_active']
+    list_filter = ['category', 'supplier', 'metal', 'is_active']
     search_fields = ['sku', 'name', 'description']
     list_editable = ['quantity_on_hand', 'is_active']

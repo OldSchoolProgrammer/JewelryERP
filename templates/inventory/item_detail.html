@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ item.sku }} - Jewelry Store ERP{% endblock %}
+{% block title %}{{ item.sku }} - Business Manager{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -28,13 +28,16 @@
                 </div>
                 {% endif %}
                 <div class="row mb-3">
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <strong>Category:</strong><br>{{ item.category.name|default:"-" }}
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
+                        <strong>Supplier:</strong><br>{{ item.supplier.name|default:"-" }}
+                    </div>
+                    <div class="col-md-3">
                         <strong>Metal:</strong><br>{{ item.get_metal_display }}
                     </div>
-                    <div class="col-md-4">
+                    <div class="col-md-3">
                         <strong>Purity:</strong><br>{{ item.purity|default:"-" }}
                     </div>
                 </div>
