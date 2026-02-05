@@ -36,7 +36,7 @@ Pay online: {checkout_url}
 
 Thank you for your business!
 
-Jewelry Store
+Michaello Jewelry
 """
     
     try:
@@ -75,7 +75,7 @@ Your payment has been received and processed successfully.
 
 Thank you for your business!
 
-Jewelry Store
+Michaello Jewelry
 """
     
     try:
@@ -113,7 +113,7 @@ Please find attached your jewelry certificate {certificate.certificate_number}.
 
 Thank you for your purchase!
 
-Jewelry Store
+Michaello Jewelry
 """
     
     try:

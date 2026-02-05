@@ -3,24 +3,24 @@
 {% block title %}Dashboard - Jewelry Store ERP{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row g-4 justify-content-center">
     <!-- Inventory Card -->
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card bg-primary text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card bg-primary text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Inventory</h6>
-                        <h2 class="card-title mb-0 display-5">{{ item_count }}</h2>
+                        <h6 class="card-subtitle mb-2 text-white-50">Total Inventory</h6>
+                        <h2 class="card-title mb-0 display-4 fw-bold">{{ item_count }}</h2>
                     </div>
-                    <i class="bi bi-box-seam display-4 opacity-50"></i>
+                    <i class="bi bi-box-seam display-1 opacity-25"></i>
                 </div>
-                <div class="mt-auto">
-                    <a href="{% url 'inventory:item_create' %}" class="btn btn-light btn-sm w-100 mb-2">
-                        <i class="bi bi-plus-circle me-1"></i>Add New Item
+                <div class="mt-auto d-grid gap-3">
+                    <a href="{% url 'inventory:item_create' %}" class="btn btn-light btn-lg py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Add New Item
                     </a>
-                    <a href="{% url 'inventory:item_list' %}" class="btn btn-outline-light btn-sm w-100">
-                        <i class="bi bi-list me-1"></i>View All Items
+                    <a href="{% url 'inventory:item_list' %}" class="btn btn-outline-light btn-lg py-3 fw-semibold">
+                        <i class="bi bi-list-ul me-2"></i>View All Items
                     </a>
                 </div>
             </div>
@@ -28,45 +28,22 @@
     </div>
     
     <!-- Customers Card -->
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card bg-success text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card bg-success text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Customers</h6>
-                        <h2 class="card-title mb-0 display-5">{{ customer_count }}</h2>
+                        <h6 class="card-subtitle mb-2 text-white-50">Active Customers</h6>
+                        <h2 class="card-title mb-0 display-4 fw-bold">{{ customer_count }}</h2>
                     </div>
-                    <i class="bi bi-people display-4 opacity-50"></i>
+                    <i class="bi bi-people display-1 opacity-25"></i>
                 </div>
-                <div class="mt-auto">
-                    <a href="{% url 'crm:customer_create' %}" class="btn btn-light btn-sm w-100 mb-2">
-                        <i class="bi bi-plus-circle me-1"></i>Add New Customer
+                <div class="mt-auto d-grid gap-3">
+                    <a href="{% url 'crm:customer_create' %}" class="btn btn-light btn-lg py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-person-plus me-2"></i>Add Customer
                     </a>
-                    <a href="{% url 'crm:customer_list' %}" class="btn btn-outline-light btn-sm w-100">
-                        <i class="bi bi-list me-1"></i>View All Customers
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Invoices Card -->
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card bg-warning text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <div>
-                        <h6 class="card-subtitle mb-2 text-white-50">Invoices</h6>
-                        <h2 class="card-title mb-0 display-5">{{ invoice_count }}</h2>
-                    </div>
-                    <i class="bi bi-receipt display-4 opacity-50"></i>
-                </div>
-                <div class="mt-auto">
-                    <a href="{% url 'sales:invoice_create' %}" class="btn btn-light btn-sm w-100 mb-2">
-                        <i class="bi bi-plus-circle me-1"></i>Create New Invoice
-                    </a>
-                    <a href="{% url 'sales:invoice_list' %}" class="btn btn-outline-light btn-sm w-100">
-                        <i class="bi bi-list me-1"></i>View All Invoices
+                    <a href="{% url 'crm:customer_list' %}" class="btn btn-outline-light btn-lg py-3 fw-semibold">
+                        <i class="bi bi-person-lines-fill me-2"></i>View All
                     </a>
                 </div>
             </div>
@@ -74,26 +51,97 @@
     </div>
     
     <!-- Suppliers Card -->
-    <div class="col-md-6 col-lg-3 mb-4">
-        <div class="card bg-info text-white h-100">
-            <div class="card-body d-flex flex-column">
-                <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card bg-info text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
                     <div>
                         <h6 class="card-subtitle mb-2 text-white-50">Suppliers</h6>
-                        <h2 class="card-title mb-0 display-5">{{ supplier_count }}</h2>
+                        <h2 class="card-title mb-0 display-4 fw-bold">{{ supplier_count }}</h2>
                     </div>
-                    <i class="bi bi-truck display-4 opacity-50"></i>
+                    <i class="bi bi-truck display-1 opacity-25"></i>
                 </div>
-                <div class="mt-auto">
-                    <a href="{% url 'crm_suppliers:supplier_create' %}" class="btn btn-light btn-sm w-100 mb-2">
-                        <i class="bi bi-plus-circle me-1"></i>Add New Supplier
+                <div class="mt-auto d-grid gap-3">
+                    <a href="{% url 'crm_suppliers:supplier_create' %}" class="btn btn-light btn-lg py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>Add Supplier
                     </a>
-                    <a href="{% url 'crm_suppliers:supplier_list' %}" class="btn btn-outline-light btn-sm w-100">
-                        <i class="bi bi-list me-1"></i>View All Suppliers
+                    <a href="{% url 'crm_suppliers:supplier_list' %}" class="btn btn-outline-light btn-lg py-3 fw-semibold">
+                        <i class="bi bi-list-check me-2"></i>View All
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Invoices Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card bg-warning text-dark h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-dark-50">Sales Invoices</h6>
+                        <h2 class="card-title mb-0 display-4 fw-bold">{{ invoice_count }}</h2>
+                    </div>
+                    <i class="bi bi-receipt display-1 opacity-25"></i>
+                </div>
+                <div class="mt-auto d-grid gap-3">
+                    <a href="{% url 'sales:invoice_create' %}" class="btn btn-light btn-lg py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-plus-square me-2"></i>Create Invoice
+                    </a>
+                    <a href="{% url 'sales:invoice_list' %}" class="btn btn-outline-light btn-lg py-3 fw-semibold">
+                        <i class="bi bi-journals me-2"></i>View All Invoices
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificates Card -->
+    <div class="col-12 col-md-6 col-lg-4">
+        <div class="card bg-secondary text-white h-100 shadow-sm border-0">
+            <div class="card-body d-flex flex-column p-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <div>
+                        <h6 class="card-subtitle mb-2 text-white-50">Certificates</h6>
+                        <h2 class="card-title mb-0 display-4 fw-bold">{{ certificate_count }}</h2>
+                    </div>
+                    <i class="bi bi-file-earmark-pdf display-1 opacity-25"></i>
+                </div>
+                <div class="mt-auto d-grid gap-3">
+                    <a href="{% url 'documents:certificate_create' %}" class="btn btn-light btn-lg py-3 fw-semibold shadow-sm">
+                        <i class="bi bi-plus-circle me-2"></i>New Certificate
+                    </a>
+                    <a href="{% url 'documents:certificate_list' %}" class="btn btn-outline-light btn-lg py-3 fw-semibold">
+                        <i class="bi bi-files me-2"></i>View All
                     </a>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .card:active {
+        transform: scale(0.98);
+    }
+    .display-4 {
+        font-size: 3.5rem;
+    }
+    @media (max-width: 768px) {
+        .display-4 {
+            font-size: 2.5rem;
+        }
+    }
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.9; }
+        100% { opacity: 1; }
+    }
+    .animate-pulse {
+        animation: pulse 2s infinite ease-in-out;
+    }
+</style>
 {% endblock %}

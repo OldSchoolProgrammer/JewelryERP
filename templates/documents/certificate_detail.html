@@ -10,7 +10,11 @@
         <a href="{% url 'documents:certificate_download' certificate.pk %}" class="btn btn-primary">
             <i class="bi bi-download me-1"></i>Download PDF
         </a>
-        {% if certificate.invoice and certificate.invoice.customer %}
+        {% if certificate.customer %}
+        <a href="{% url 'documents:certificate_email' certificate.pk %}" class="btn btn-success">
+            <i class="bi bi-envelope me-1"></i>Email to Customer
+        </a>
+        {% elif certificate.invoice.customer %}
         <a href="{% url 'documents:certificate_email' certificate.pk %}" class="btn btn-success">
             <i class="bi bi-envelope me-1"></i>Email to Customer
         </a>
@@ -71,16 +75,28 @@
     
     <div class="col-lg-4">
         <div class="card">
-            <div class="card-header">Related Invoice</div>
+            <div class="card-header">Related Information</div>
             <div class="card-body">
                 {% if certificate.invoice %}
-                <p><strong>Invoice:</strong> <a href="{% url 'sales:invoice_detail' certificate.invoice.pk %}">{{ certificate.invoice.invoice_number }}</a></p>
+                <h6 class="mb-2">Invoice</h6>
+                <p class="mb-1"><strong>Invoice:</strong> <a href="{% url 'sales:invoice_detail' certificate.invoice.pk %}">{{ certificate.invoice.invoice_number }}</a></p>
                 {% if certificate.invoice.customer %}
-                <p><strong>Customer:</strong> {{ certificate.invoice.customer.name }}</p>
-                <p><strong>Email:</strong> {{ certificate.invoice.customer.email|default:"-" }}</p>
+                <p class="mb-1"><strong>Customer:</strong> {{ certificate.invoice.customer.name }}</p>
+                <p class="mb-3"><strong>Email:</strong> {{ certificate.invoice.customer.email|default:"-" }}</p>
                 {% endif %}
-                {% else %}
-                <p class="text-muted">No invoice linked.</p>
+                {% endif %}
+                
+                {% if certificate.customer %}
+                <h6 class="mb-2">{% if certificate.invoice %}Direct {% endif %}Customer</h6>
+                <p class="mb-1"><strong>Name:</strong> {{ certificate.customer.name }}</p>
+                <p class="mb-1"><strong>Email:</strong> {{ certificate.customer.email|default:"-" }}</p>
+                {% if certificate.customer.phone %}
+                <p class="mb-1"><strong>Phone:</strong> {{ certificate.customer.phone }}</p>
+                {% endif %}
+                {% endif %}
+                
+                {% if not certificate.invoice and not certificate.customer %}
+                <p class="text-muted">No invoice or customer linked.</p>
                 {% endif %}
             </div>
         </div>

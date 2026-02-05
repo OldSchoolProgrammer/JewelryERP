@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Q
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 
 from .models import Customer, Supplier
 from .forms import CustomerForm, SupplierForm
@@ -67,6 +68,32 @@ def customer_delete(request, pk):
         messages.success(request, f'Customer "{name}" deleted successfully.')
         return redirect('crm:customer_list')
     return render(request, 'crm/customer_confirm_delete.html', {'customer': customer})
+
+
+@login_required
+def customer_search(request):
+    """JSON endpoint for searching customers (for Tom Select dropdowns)."""
+    query = request.GET.get('q', '').strip()
+    customers = Customer.objects.all()
+    
+    if query:
+        customers = customers.filter(
+            Q(name__icontains=query) | 
+            Q(email__icontains=query) | 
+            Q(phone__icontains=query)
+        )
+    
+    customers = customers[:20]  # Limit results
+    
+    results = [{
+        'id': customer.id,
+        'text': customer.name,
+        'name': customer.name,
+        'email': customer.email,
+        'phone': customer.phone,
+    } for customer in customers]
+    
+    return JsonResponse({'results': results})
 
 
 # Supplier Views

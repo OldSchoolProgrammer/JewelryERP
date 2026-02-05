@@ -14,7 +14,7 @@ ITEMS_PER_PAGE = 10
 
 @login_required
 def certificate_list(request):
-    certificates = Certificate.objects.select_related('item', 'invoice').all()
+    certificates = Certificate.objects.select_related('item', 'invoice', 'customer').all()
     
     paginator = Paginator(certificates, ITEMS_PER_PAGE)
     page_number = request.GET.get('page')
@@ -25,7 +25,7 @@ def certificate_list(request):
 
 @login_required
 def certificate_detail(request, pk):
-    certificate = get_object_or_404(Certificate.objects.select_related('item', 'invoice'), pk=pk)
+    certificate = get_object_or_404(Certificate.objects.select_related('item', 'invoice', 'customer'), pk=pk)
     return render(request, 'documents/certificate_detail.html', {'certificate': certificate})
 
 
@@ -43,10 +43,13 @@ def certificate_create(request):
         # Pre-fill item if provided in query params
         item_id = request.GET.get('item')
         invoice_id = request.GET.get('invoice')
+        customer_id = request.GET.get('customer')
         if item_id:
             form.fields['item'].initial = item_id
         if invoice_id:
             form.fields['invoice'].initial = invoice_id
+        if customer_id:
+            form.fields['customer'].initial = customer_id
     return render(request, 'documents/certificate_form.html', {'form': form, 'title': 'Generate Certificate'})
 
 
@@ -68,10 +71,13 @@ def certificate_download(request, pk):
 
 @login_required
 def certificate_email(request, pk):
-    certificate = get_object_or_404(Certificate.objects.select_related('item', 'invoice', 'invoice__customer'), pk=pk)
+    certificate = get_object_or_404(Certificate.objects.select_related('item', 'invoice', 'invoice__customer', 'customer'), pk=pk)
     
     customer = None
-    if certificate.invoice and certificate.invoice.customer:
+    # Check for direct customer link first, then fall back to invoice customer
+    if certificate.customer:
+        customer = certificate.customer
+    elif certificate.invoice and certificate.invoice.customer:
         customer = certificate.invoice.customer
     
     if not customer or not customer.email:

@@ -100,6 +100,8 @@ class CustomerForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # Make email required
+        self.fields['email'].required = True
         # Parse existing phone into prefix and number
         if self.instance and self.instance.phone:
             phone = self.instance.phone

@@ -3,11 +3,13 @@ from django.utils import timezone
 
 from inventory.models import JewelryItem
 from sales.models import Invoice
+from crm.models import Customer
 
 
 class Certificate(models.Model):
     item = models.ForeignKey(JewelryItem, on_delete=models.CASCADE, related_name='certificates')
     invoice = models.ForeignKey(Invoice, on_delete=models.SET_NULL, null=True, blank=True, related_name='certificates')
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True, related_name='certificates')
     pdf_file = models.FileField(upload_to='certificates/', blank=True, null=True)
     certificate_number = models.CharField(max_length=50, unique=True, editable=False)
     issued_at = models.DateTimeField(default=timezone.now)
