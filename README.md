@@ -119,12 +119,12 @@ Traefik labels in `web_apps_docker-compose.yml` route:
 Docker Hub repositories are namespaced by your username. Build and push like:
 
 ```bash
-docker build -t <your_dockerhub_username>/michaellobmapp:latest .
+docker build -t oldschoolprogrammer/michaellobmapp:latest .
 docker login
-docker push <your_dockerhub_username>/michaellobmapp:latest
+docker push oldschoolprogrammer/michaellobmapp:latest
 ```
 
-Then set `MICHAELLOBMAPP_IMAGE=<your_dockerhub_username>/michaellobmapp:latest` in `.env` and run:
+Then set `MICHAELLOBMAPP_IMAGE=oldschoolprogrammer/michaellobmapp:latest` in `.env` and run:
 
 ```bash
 docker compose -f web_apps_docker-compose.yml pull michaellobmapp

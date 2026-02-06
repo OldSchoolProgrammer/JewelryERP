@@ -30,14 +30,10 @@ def _env_bool(name: str, default: str = 'False') -> bool:
 ENVIRONMENT = os.getenv('ENVIRONMENT', 'development').lower()  # development|production
 
 # SECURITY WARNING: keep the secret key used in production secret!
-<<<<<<< HEAD
 _secret_key = os.getenv('SECRET_KEY')
 if ENVIRONMENT == 'production' and not _secret_key:
     raise RuntimeError('SECRET_KEY must be set in production')
 SECRET_KEY = _secret_key or 'django-insecure-dev-key-change-in-production'
-=======
-SECRET_KEY = os.getenv('SECRET_KEY', )
->>>>>>> 271cfbf9fc3ab40f00a9c2a6eb2a520b5e3ebfa9
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = _env_bool('DEBUG', 'True')
