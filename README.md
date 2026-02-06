@@ -15,7 +15,7 @@ A Django-based web application for managing a jewelry store's inventory, sales, 
 
 - Django 6.0
 - Bootstrap 5
-- SQLite
+- SQLite (dev) / Microsoft SQL Server (prod)
 - Stripe API
 - ReportLab (PDF generation)
 
@@ -81,6 +81,55 @@ stripe listen --forward-to localhost:8000/sales/webhook/stripe/
 ```
 
 Copy the webhook signing secret to your `.env` file.
+
+## Production (Docker + Traefik + SQL Server)
+
+This repo includes a production Docker setup intended to run behind Traefik (TLS termination) and connect to an existing SQL Server container named `sqlserver` on the `backend` Docker network.
+
+### 1) Configure environment
+
+- Copy `.env.example` to `.env` and fill in:
+	- `SA_PASSWORD` (SQL Server `sa` password)
+	- `DJANGO_SECRET_KEY` (used as Django `SECRET_KEY` in compose)
+	- Stripe + email variables
+
+### 2) Start with docker compose
+
+The app service is defined in `web_apps_docker-compose.yml` and is meant to join external networks `frontend` (Traefik) and `backend` (SQL Server).
+
+```bash
+docker compose -f web_apps_docker-compose.yml up -d --build
+```
+
+On startup, the container will:
+
+- Create the SQL Server database `michaellobmdb` if it doesn't exist yet
+- Run `migrate`
+- Run `collectstatic`
+- Start Gunicorn on port 8000 (internal Docker networking)
+
+### 3) Traefik routing
+
+Traefik labels in `web_apps_docker-compose.yml` route:
+
+- `https://michaellobmapp.pandoraio.net` → the Django container
+
+### 4) Build and push to Docker Hub
+
+Docker Hub repositories are namespaced by your username. Build and push like:
+
+```bash
+docker build -t <your_dockerhub_username>/michaellobmapp:latest .
+docker login
+docker push <your_dockerhub_username>/michaellobmapp:latest
+```
+
+Then set `MICHAELLOBMAPP_IMAGE=<your_dockerhub_username>/michaellobmapp:latest` in `.env` and run:
+
+```bash
+docker compose -f web_apps_docker-compose.yml pull michaellobmapp
+docker compose -f web_apps_docker-compose.yml up -d
+```
 
 ## Project Structure
 

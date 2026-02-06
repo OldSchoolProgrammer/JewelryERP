@@ -39,3 +39,6 @@ Thumbs.db
 
 # Static files (collected)
 staticfiles/
+traefick_docker-compose.yml
+web_apps_docker-compose.yml
+michaellobmapp.sqlite3

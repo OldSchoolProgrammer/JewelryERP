@@ -23,13 +23,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
+def _env_bool(name: str, default: str = 'False') -> bool:
+    return os.getenv(name, default).lower() in ('true', '1', 'yes', 'y', 'on')
+
+
+ENVIRONMENT = os.getenv('ENVIRONMENT', 'development').lower()  # development|production
+
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dev-key-change-in-production')
+_secret_key = os.getenv('SECRET_KEY')
+if ENVIRONMENT == 'production' and not _secret_key:
+    raise RuntimeError('SECRET_KEY must be set in production')
+SECRET_KEY = _secret_key or 'django-insecure-dev-key-change-in-production'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() in ('true', '1', 'yes')
+DEBUG = _env_bool('DEBUG', 'True')
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = [h.strip() for h in os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',') if h.strip()]
+CSRF_TRUSTED_ORIGINS = [o.strip() for o in os.getenv('CSRF_TRUSTED_ORIGINS', '').split(',') if o.strip()]
 
 
 # Application definition
@@ -51,6 +61,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -82,12 +93,33 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'michaellobmapp.sqlite3',
+DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite').lower()  # sqlite|mssql
+
+if DB_ENGINE == 'mssql':
+    _encrypt = os.getenv('DB_ENCRYPT', 'yes')
+    _trust = os.getenv('DB_TRUST_SERVER_CERTIFICATE', 'yes')
+    DATABASES = {
+        'default': {
+            'ENGINE': 'mssql',
+            'NAME': os.getenv('DB_NAME', 'michaellobmdb'),
+            'USER': os.getenv('DB_USER', 'sa'),
+            'PASSWORD': os.getenv('DB_PASSWORD', ''),
+            'HOST': os.getenv('DB_HOST', 'sqlserver'),
+            'PORT': os.getenv('DB_PORT', '1433'),
+            'OPTIONS': {
+                'driver': os.getenv('DB_DRIVER', 'ODBC Driver 18 for SQL Server'),
+                'extra_params': f'Encrypt={_encrypt};TrustServerCertificate={_trust};',
+            },
+            'CONN_MAX_AGE': int(os.getenv('DB_CONN_MAX_AGE', '60')),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / os.getenv('SQLITE_NAME', 'db.sqlite3'),
+        }
+    }
 
 
 # Password validation
@@ -126,10 +158,24 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    }
+}
 
 # Media files (uploads, generated PDFs)
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# If True, config/urls.py will serve MEDIA_URL directly from Django.
+# In most production setups you should serve media via a separate web server or object storage.
+SERVE_MEDIA = _env_bool('SERVE_MEDIA', 'False')
+
+# If you are behind a reverse proxy/load balancer that sets X-Forwarded-Proto
+USE_X_FORWARDED_PROTO = _env_bool('USE_X_FORWARDED_PROTO', 'True')
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -153,3 +199,41 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', 'True').lower() in ('true', '1', 'yes
 EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', 'noreply@jewelrystore.com')
+
+
+# Security (recommended defaults for production)
+if ENVIRONMENT == 'production':
+    SECURE_SSL_REDIRECT = _env_bool('SECURE_SSL_REDIRECT', 'True')
+    SESSION_COOKIE_SECURE = _env_bool('SESSION_COOKIE_SECURE', 'True')
+    CSRF_COOKIE_SECURE = _env_bool('CSRF_COOKIE_SECURE', 'True')
+    SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '3600'))
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = _env_bool('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'True')
+    SECURE_HSTS_PRELOAD = _env_bool('SECURE_HSTS_PRELOAD', 'False')
+    SECURE_REFERRER_POLICY = os.getenv('SECURE_REFERRER_POLICY', 'same-origin')
+    SECURE_CONTENT_TYPE_NOSNIFF = _env_bool('SECURE_CONTENT_TYPE_NOSNIFF', 'True')
+    X_FRAME_OPTIONS = os.getenv('X_FRAME_OPTIONS', 'DENY')
+
+    if USE_X_FORWARDED_PROTO:
+        SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+
+LOG_LEVEL = os.getenv('LOG_LEVEL', 'INFO')
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(name)s %(message)s'
+        }
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        }
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': LOG_LEVEL,
+    },
+}
