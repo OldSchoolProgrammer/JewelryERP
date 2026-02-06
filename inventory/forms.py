@@ -1,12 +1,13 @@
 from django import forms
 from .models import JewelryItem, Category
+from crm.models import Supplier
 
 
 class JewelryItemForm(forms.ModelForm):
     class Meta:
         model = JewelryItem
         fields = [
-            'sku', 'name', 'category', 'description', 'metal', 'purity',
+            'sku', 'name', 'category', 'supplier', 'description', 'metal', 'purity',
             'weight_grams', 'stone_details', 'cost_price', 'sale_price',
             'quantity_on_hand', 'image', 'is_active'
         ]
@@ -14,6 +15,7 @@ class JewelryItemForm(forms.ModelForm):
             'sku': forms.TextInput(attrs={'class': 'form-control'}),
             'name': forms.TextInput(attrs={'class': 'form-control'}),
             'category': forms.Select(attrs={'class': 'form-select'}),
+            'supplier': forms.Select(attrs={'class': 'form-select'}),
             'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'metal': forms.Select(attrs={'class': 'form-select'}),
             'purity': forms.Select(attrs={'class': 'form-select'}),

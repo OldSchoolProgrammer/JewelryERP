@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}{{ title }} - Jewelry Store ERP{% endblock %}
+{% block title %}{{ title }} - Business Manager{% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
@@ -28,10 +28,17 @@
                     </div>
                     
                     <div class="row mb-3">
-                        <div class="col-md-4">
+                        <div class="col-md-6">
                             <label for="id_category" class="form-label">Category</label>
                             {{ form.category }}
                         </div>
+                        <div class="col-md-6">
+                            <label for="id_supplier" class="form-label">Supplier</label>
+                            {{ form.supplier }}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="id_metal" class="form-label">Metal</label>
                             {{ form.metal }}
@@ -40,17 +47,15 @@
                             <label for="id_purity" class="form-label">Purity</label>
                             {{ form.purity }}
                         </div>
-                    </div>
-                    
-                    <div class="row mb-3">
                         <div class="col-md-4">
                             <label for="id_weight_grams" class="form-label">Weight (grams)</label>
                             {{ form.weight_grams }}
                         </div>
-                        <div class="col-md-8">
-                            <label for="id_stone_details" class="form-label">Stone Details</label>
-                            {{ form.stone_details }}
-                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="id_stone_details" class="form-label">Stone Details</label>
+                        {{ form.stone_details }}
                     </div>
                     
                     <div class="mb-3">

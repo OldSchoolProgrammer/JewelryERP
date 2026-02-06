@@ -39,6 +39,11 @@ Thumbs.db
 
 # Static files (collected)
 staticfiles/
+<<<<<<< HEAD
 traefick_docker-compose.yml
 web_apps_docker-compose.yml
 michaellobmapp.sqlite3
+=======
+michaellobmapp.sqlite3
+fix_orphaned_records.py
+>>>>>>> 271cfbf9fc3ab40f00a9c2a6eb2a520b5e3ebfa9
