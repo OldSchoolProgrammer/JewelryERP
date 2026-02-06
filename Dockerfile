@@ -16,6 +16,7 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         ca-certificates \
         curl \
+        gosu \
         gnupg \
         apt-transport-https \
         unixodbc \
@@ -42,7 +43,9 @@ RUN chmod +x /app/scripts/entrypoint.sh
 # Run as non-root
 RUN useradd -m appuser \
     && chown -R appuser:appuser /app
-USER appuser
+
+# Start as root so the entrypoint can fix permissions on mounted volumes (e.g. /app/media).
+USER root
 
 EXPOSE 8000
 

@@ -3,3 +3,7 @@ python-dotenv==1.2.1
 stripe==14.2.0
 reportlab==4.4.9
 pillow==12.1.0
+gunicorn>=21,<23
+whitenoise>=6,<7
+mssql-django>=1.5,<2
+pyodbc>=5,<6

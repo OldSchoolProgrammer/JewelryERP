@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 import time
 
@@ -29,7 +30,7 @@ def main() -> int:
     conn_str = (
         f"DRIVER={{{driver}}};"
         f"SERVER={server};"
-        f"DATABASE=master;"
+        "DATABASE=master;"
         f"UID={user};"
         f"PWD={password};"
         f"Encrypt={encrypt};"
@@ -41,15 +42,28 @@ def main() -> int:
     start = time.time()
     last_error: Exception | None = None
 
+    # NOTE: Parameter markers (`?`) are surprisingly constrained in some T-SQL
+    # contexts via ODBC (e.g. `DB_ID(N?)`, some `DECLARE` initializers).
+    # To keep startup reliable, we validate the DB name and inline it.
+    if not re.fullmatch(r"[A-Za-z0-9_-]+", database):
+        raise RuntimeError(
+            "DB_NAME contains unsupported characters; allowed: A-Z a-z 0-9 _ -"
+        )
+
+    db_id_literal = database.replace("'", "''")
+    db_bracket_escaped = database.replace("]", "]]" )
+    create_db_sql = (
+        "IF DB_ID(N'" + db_id_literal + "') IS NULL "
+        "BEGIN "
+        "  EXEC(N'CREATE DATABASE [" + db_bracket_escaped + "]'); "
+        "END"
+    )
+
     while time.time() - start < max_wait_seconds:
         try:
             with pyodbc.connect(conn_str, autocommit=True) as conn:
                 cursor = conn.cursor()
-                cursor.execute(
-                    "IF DB_ID(N?) IS NULL BEGIN EXEC('CREATE DATABASE [' + REPLACE(?, ']', ']]') + ']') END",
-                    database,
-                    database,
-                )
+                cursor.execute(create_db_sql)
                 return 0
         except Exception as exc:  # pragma: no cover
             last_error = exc
